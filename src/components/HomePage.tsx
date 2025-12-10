@@ -6,6 +6,7 @@ import LibraryCollection from './LibraryCollection';
 import SuggestBookModal from './SuggestBookModal';
 import WriteReviewModal from './WriteReviewModal';
 import ReportsModal from './ReportsModal';
+import NewArrivalsSection from './NewArrivalsSection';
 import { Lightbulb, Edit, BarChart3, ArrowLeft } from 'lucide-react';
 
 const HomePage: React.FC = () => {
@@ -46,7 +47,7 @@ const HomePage: React.FC = () => {
       <Header />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary-dark mb-6">
-            <ArrowLeft size={16} /> Back to Landing Page
+          <ArrowLeft size={16} /> Back to Landing Page
         </button>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {actionCards.map((card, index) => (
@@ -61,6 +62,7 @@ const HomePage: React.FC = () => {
             />
           ))}
         </div>
+        <NewArrivalsSection />
         <LibraryCollection />
       </main>
 

@@ -11,6 +11,7 @@ import ScanQRModal from './ScanQRModal';
 import BookQRCodeModal from './BookQRCodeModal';
 import BulkQRDownloadModal from './BulkQRDownloadModal';
 import BookModal from './BookModal';
+import PrintMemberCardModal from './PrintMemberCardModal';
 import Pagination from './Pagination';
 import ConfirmationModal from './ConfirmationModal';
 import { useNotification } from '../contexts/NotificationContext';
@@ -75,17 +76,22 @@ const AdminDashboard: React.FC = () => {
 
   // Modal states
   const [showMemberModal, setShowMemberModal] = useState(false);
-  const [showIssueModal, setShowIssueModal] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+
+  const [showBookModal, setShowBookModal] = useState(false);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [showAddBookModal, setShowAddBookModal] = useState(false);
+
+  const [showIssueBookModal, setShowIssueBookModal] = useState(false);
+
   const [showScanModal, setShowScanModal] = useState(false);
   const [showBookQRModal, setShowBookQRModal] = useState(false);
   const [selectedBookForQR, setSelectedBookForQR] = useState<Book | null>(null);
   const [showBulkQRModal, setShowBulkQRModal] = useState(false);
-  const [showBookModal, setShowBookModal] = useState(false);
-  const [editingBook, setEditingBook] = useState<Book | null>(null);
-  const [showAddBookModal, setShowAddBookModal] = useState(false);
+
   const [showManageCategoriesModal, setShowManageCategoriesModal] = useState(false);
   const [showPrintMembersModal, setShowPrintMembersModal] = useState(false);
+  const [showPrintCardModal, setShowPrintCardModal] = useState(false);
 
   // Search and Filter states
   const [circulationSearch, setCirculationSearch] = useState('');
@@ -514,7 +520,7 @@ th, td { border: 1px solid #d1d5db; padding: 8px; text - align: left; }
                       <QrCode size={20} /> Quick Scan
                     </button>
                     <button
-                      onClick={() => setShowIssueModal(true)}
+                      onClick={() => setShowIssueBookModal(true)}
                       className="bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-bold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
                     >
                       <Plus size={20} /> Issue Book
@@ -801,6 +807,9 @@ th, td { border: 1px solid #d1d5db; padding: 8px; text - align: left; }
                   <div className="flex gap-2 flex-wrap">
                     <button onClick={() => setShowPrintMembersModal(true)} className="bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-bold transition-all shadow-md hover:shadow-lg">
                       <Printer size={18} /> Print List
+                    </button>
+                    <button onClick={() => setShowPrintCardModal(true)} className="bg-white border-2 border-secondary text-secondary hover:bg-secondary hover:text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-bold transition-all shadow-md hover:shadow-lg">
+                      <QrCode size={18} /> Print Cards
                     </button>
                     <button onClick={() => { setEditingMember(null); setShowMemberModal(true); }} className="bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-bold transition-all shadow-md hover:shadow-lg">
                       <Plus size={18} /> Add Member
@@ -1110,7 +1119,7 @@ th, td { border: 1px solid #d1d5db; padding: 8px; text - align: left; }
       </div>
 
       {showMemberModal && <MemberModal member={editingMember} onClose={() => { setShowMemberModal(false); setEditingMember(null); }} onSave={() => { setShowMemberModal(false); setEditingMember(null); }} />}
-      {showIssueModal && <IssueBookModal onClose={() => setShowIssueModal(false)} onSave={() => setShowIssueModal(false)} />}
+      {showIssueBookModal && <IssueBookModal onClose={() => setShowIssueBookModal(false)} onSave={() => setShowIssueBookModal(false)} />}
       {showScanModal && <ScanQRModal onClose={() => setShowScanModal(false)} onSuccess={fetchData} />}
       {showBookQRModal && selectedBookForQR && <BookQRCodeModal book={selectedBookForQR} onClose={() => setShowBookQRModal(false)} />}
       {showBulkQRModal && <BulkQRDownloadModal onClose={() => setShowBulkQRModal(false)} />}
@@ -1119,8 +1128,15 @@ th, td { border: 1px solid #d1d5db; padding: 8px; text - align: left; }
       {showManageCategoriesModal && <CategoryManager onClose={() => setShowManageCategoriesModal(false)} onSave={fetchData} />}
       {showPrintMembersModal && (
         <Suspense fallback={null}>
-          <PrintMembersModal onClose={() => setShowPrintMembersModal(false)} allMembers={members} />
+          <PrintMembersModal allMembers={filteredMembers} onClose={() => setShowPrintMembersModal(false)} />
         </Suspense>
+      )}
+
+      {showPrintCardModal && (
+        <PrintMemberCardModal
+          members={filteredMembers}
+          onClose={() => setShowPrintCardModal(false)}
+        />
       )}
     </div>
   );

@@ -249,8 +249,8 @@ const MemberLookupPage: React.FC = () => {
                                             <p className="text-xl font-bold text-amber-900">{member.class || 'N/A'}</p>
                                         </div>
                                         <div className={`bg-gradient-to-br p-4 rounded-xl border-2 ${member.status === 'active'
-                                                ? 'from-green-50 to-green-100 border-green-200'
-                                                : 'from-red-50 to-red-100 border-red-200'
+                                            ? 'from-green-50 to-green-100 border-green-200'
+                                            : 'from-red-50 to-red-100 border-red-200'
                                             }`}>
                                             <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${member.status === 'active' ? 'text-green-600' : 'text-red-600'
                                                 }`}>Status</p>
@@ -321,63 +321,125 @@ const MemberLookupPage: React.FC = () => {
                                 </div>
                                 <div className="p-6">
                                     {history.length > 0 ? (
-                                        <div className="overflow-x-auto -mx-6 px-6">
-                                            <table className="min-w-full">
-                                                <thead>
-                                                    <tr className="border-b-2 border-neutral-200">
-                                                        <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Book</th>
-                                                        <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Issue Date</th>
-                                                        <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Due Date</th>
-                                                        <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Return Date</th>
-                                                        <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Status</th>
-                                                        <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Penalty</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-neutral-200">
-                                                    {history.map((item) => {
-                                                        const isOverdue = item.status === 'issued' && new Date(item.due_date) < new Date();
-                                                        const hasFine = item.fine_amount > 0;
-                                                        return (
-                                                            <tr key={item.id} className="hover:bg-neutral-50 transition-colors">
-                                                                <td className="px-4 py-4">
-                                                                    <div className="font-bold text-neutral-900">{item.books?.title}</div>
-                                                                    <div className="text-xs text-neutral-500">{item.books?.author}</div>
-                                                                </td>
-                                                                <td className="px-4 py-4 text-sm text-neutral-600 font-medium">{new Date(item.issue_date).toLocaleDateString()}</td>
-                                                                <td className="px-4 py-4 text-sm text-neutral-600 font-medium">{new Date(item.due_date).toLocaleDateString()}</td>
-                                                                <td className="px-4 py-4 text-sm text-neutral-600 font-medium">{item.return_date ? new Date(item.return_date).toLocaleDateString() : '-'}</td>
-                                                                <td className="px-4 py-4">
-                                                                    {item.status === 'returned' ? (
-                                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-800 border-2 border-green-200">
-                                                                            <Check size={14} /> Returned
-                                                                        </span>
-                                                                    ) : isOverdue ? (
-                                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border-2 border-red-200 animate-pulse">
-                                                                            <XCircle size={14} /> Overdue
-                                                                        </span>
-                                                                    ) : (
-                                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border-2 border-blue-200">
-                                                                            <BookOpen size={14} /> Issued
-                                                                        </span>
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-4 py-4">
-                                                                    {hasFine ? (
-                                                                        <div className="flex flex-col">
-                                                                            <span className="font-bold text-red-600 text-lg">₹{item.fine_amount}</span>
-                                                                            <span className={`text-[10px] font-bold uppercase ${item.fine_status === 'paid' ? 'text-green-600' : 'text-red-600'
-                                                                                }`}>{item.fine_status}</span>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <span className="text-neutral-400 font-medium">-</span>
-                                                                    )}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                        <>
+                                            {/* Desktop Table View */}
+                                            <div className="hidden md:block overflow-x-auto -mx-6 px-6">
+                                                <table className="min-w-full">
+                                                    <thead>
+                                                        <tr className="border-b-2 border-neutral-200">
+                                                            <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Book</th>
+                                                            <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Issue Date</th>
+                                                            <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Due Date</th>
+                                                            <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Return Date</th>
+                                                            <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Status</th>
+                                                            <th className="px-4 py-4 text-left text-xs font-bold text-neutral-600 uppercase tracking-wider">Penalty</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-neutral-200">
+                                                        {history.map((item) => {
+                                                            const isOverdue = item.status === 'issued' && new Date(item.due_date) < new Date();
+                                                            const hasFine = item.fine_amount > 0;
+                                                            return (
+                                                                <tr key={item.id} className="hover:bg-neutral-50 transition-colors">
+                                                                    <td className="px-4 py-4">
+                                                                        <div className="font-bold text-neutral-900">{item.books?.title}</div>
+                                                                        <div className="text-xs text-neutral-500">{item.books?.author}</div>
+                                                                    </td>
+                                                                    <td className="px-4 py-4 text-sm text-neutral-600 font-medium">{new Date(item.issue_date).toLocaleDateString()}</td>
+                                                                    <td className="px-4 py-4 text-sm text-neutral-600 font-medium">{new Date(item.due_date).toLocaleDateString()}</td>
+                                                                    <td className="px-4 py-4 text-sm text-neutral-600 font-medium">{item.return_date ? new Date(item.return_date).toLocaleDateString() : '-'}</td>
+                                                                    <td className="px-4 py-4">
+                                                                        {item.status === 'returned' ? (
+                                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-800 border-2 border-green-200">
+                                                                                <Check size={14} /> Returned
+                                                                            </span>
+                                                                        ) : isOverdue ? (
+                                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border-2 border-red-200 animate-pulse">
+                                                                                <XCircle size={14} /> Overdue
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border-2 border-blue-200">
+                                                                                <BookOpen size={14} /> Issued
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="px-4 py-4">
+                                                                        {hasFine ? (
+                                                                            <div className="flex flex-col">
+                                                                                <span className="font-bold text-red-600 text-lg">₹{item.fine_amount}</span>
+                                                                                <span className={`text-[10px] font-bold uppercase ${item.fine_status === 'paid' ? 'text-green-600' : 'text-red-600'
+                                                                                    }`}>{item.fine_status}</span>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-neutral-400 font-medium">-</span>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            {/* Mobile Card View */}
+                                            <div className="md:hidden space-y-4">
+                                                {history.map((item) => {
+                                                    const isOverdue = item.status === 'issued' && new Date(item.due_date) < new Date();
+                                                    const hasFine = item.fine_amount > 0;
+                                                    return (
+                                                        <div key={item.id} className="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
+                                                            <div className="flex justify-between items-start mb-3">
+                                                                <div>
+                                                                    <h4 className="font-bold text-neutral-900 line-clamp-2">{item.books?.title}</h4>
+                                                                    <p className="text-xs text-neutral-500">{item.books?.author}</p>
+                                                                </div>
+                                                                {item.status === 'returned' ? (
+                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">
+                                                                        <Check size={12} /> Returned
+                                                                    </span>
+                                                                ) : isOverdue ? (
+                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-200 animate-pulse">
+                                                                        <XCircle size={12} /> Overdue
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                                                        <BookOpen size={12} /> Issued
+                                                                    </span>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="grid grid-cols-2 gap-3 text-xs mb-3">
+                                                                <div>
+                                                                    <p className="text-neutral-500 mb-0.5">Issue Date</p>
+                                                                    <p className="font-semibold text-neutral-700">{new Date(item.issue_date).toLocaleDateString()}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-neutral-500 mb-0.5">Due Date</p>
+                                                                    <p className="font-semibold text-neutral-700">{new Date(item.due_date).toLocaleDateString()}</p>
+                                                                </div>
+                                                                {item.return_date && (
+                                                                    <div>
+                                                                        <p className="text-neutral-500 mb-0.5">Returned</p>
+                                                                        <p className="font-semibold text-neutral-700">{new Date(item.return_date).toLocaleDateString()}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {hasFine && (
+                                                                <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
+                                                                    <span className="text-xs font-bold text-neutral-600">Penalty</span>
+                                                                    <div className="text-right">
+                                                                        <span className="font-bold text-red-600">₹{item.fine_amount}</span>
+                                                                        <span className={`ml-2 text-[10px] font-bold uppercase ${item.fine_status === 'paid' ? 'text-green-600' : 'text-red-600'
+                                                                            }`}>{item.fine_status}</span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </>
                                     ) : (
                                         <div className="text-center py-16 bg-neutral-50 rounded-xl border-2 border-dashed border-neutral-200">
                                             <div className="bg-neutral-200 p-4 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">

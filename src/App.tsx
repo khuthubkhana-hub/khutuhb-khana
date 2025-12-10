@@ -8,7 +8,6 @@ import LandingPage from './components/LandingPage';
 import BookDetailPage from './components/BookDetailPage';
 import ReadWithUsPage from './components/ReadWithUsPage';
 import PostDetailPage from './components/PostDetailPage';
-import SetupGuide from './components/SetupGuide';
 import AdminLogin from './components/AdminLogin';
 import MemberLookupPage from './components/MemberLookupPage';
 import Spinner from './components/Spinner';
@@ -18,7 +17,7 @@ const ADMIN_EMAILS = ['admin@muhimmath.com', 'darkmod261@gmail.com'];
 
 const AdminRoute = ({ session, children }: { session: Session | null, children: JSX.Element }) => {
   const location = useLocation();
-  
+
   // Check if the user's email is in the allowed list
   const isAdmin = session?.user?.email && ADMIN_EMAILS.includes(session.user.email);
 
@@ -63,19 +62,18 @@ function App() {
       <Route path="/book/:bookId" element={<BookDetailPage />} />
       <Route path="/read-with-us" element={<ReadWithUsPage />} />
       <Route path="/read-with-us/:postId" element={<PostDetailPage />} />
-      <Route path="/setup-guide" element={<SetupGuide />} />
       <Route path="/member-status" element={<MemberLookupPage />} />
-      
+
       {/* Auth Routes */}
-      <Route 
-        path="/admin-login" 
+      <Route
+        path="/admin-login"
         element={
-          session && session.user.email && ADMIN_EMAILS.includes(session.user.email) 
-            ? <Navigate to="/admin" /> 
+          session && session.user.email && ADMIN_EMAILS.includes(session.user.email)
+            ? <Navigate to="/admin" />
             : <AdminLogin />
-        } 
+        }
       />
-      
+
       {/* Protected Routes */}
       <Route
         path="/admin"
