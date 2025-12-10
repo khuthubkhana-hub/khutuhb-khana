@@ -1,0 +1,271 @@
+import React, { useState, useEffect } from 'react';
+import { X, Loader2, Plus, Trash2 } from 'lucide-react';
+import Select from 'react-select';
+import { supabase, type Member } from '../lib/supabase';
+
+interface MemberModalProps {
+  member?: Member | null;
+  onClose: () => void;
+  onSave: () => void;
+}
+
+const defaultMemberClasses = [
+  "Staff", "BS 5", "BS 4", "BS 3A", "BS 3B", "BS 2A", "BS 2B", "BS 1A", "BS 1B", "HS 2A", "HS 2B",
+  "HS 2C", "HS 1A", "HS 1B", "HS 1C", "HS 1D", "QURAN ACADEMY",
+  "Usthad", "Librarian", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th", "Other"
+];
+
+const customSelectStyles = {
+  control: (base: any) => ({
+    ...base,
+    borderColor: '#d1d5db',
+    minHeight: '42px',
+    height: '42px',
+    '&:hover': { borderColor: '#a5b4fc' },
+    boxShadow: 'none',
+  }),
+  option: (base: any, { isFocused, isSelected }: { isFocused: boolean, isSelected: boolean }) => ({
+    ...base,
+    backgroundColor: isSelected ? '#8b5cf6' : isFocused ? '#ede9fe' : undefined,
+    color: isSelected ? 'white' : 'black',
+  }),
+};
+
+const MemberModal: React.FC<MemberModalProps> = ({ member, onClose, onSave }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    place: '',
+    register_number: '',
+    class: '',
+    address: '',
+    membership_type: 'student' as Member['membership_type'],
+    status: 'active' as Member['status']
+  });
+  const [loading, setLoading] = useState(false);
+  const [isFetchingId, setIsFetchingId] = useState(false);
+  const [memberClasses, setMemberClasses] = useState<string[]>(defaultMemberClasses);
+  const [newClassName, setNewClassName] = useState('');
+  const [showAddClass, setShowAddClass] = useState(false);
+
+  const classOptions = memberClasses.map(c => ({ value: c, label: c }));
+
+  useEffect(() => {
+    const fetchNextRegisterNumber = async () => {
+      setIsFetchingId(true);
+      const { data, error } = await supabase.rpc('get_next_register_number');
+      if (error) {
+        console.error('Error fetching next register number:', error);
+        alert('Could not fetch the next register number.');
+      } else {
+        setFormData(prev => ({ ...prev, register_number: data }));
+      }
+      setIsFetchingId(false);
+    };
+
+    if (member) {
+      setFormData({
+        name: member.name,
+        email: member.email,
+        phone: member.phone || '',
+        place: member.place || '',
+        register_number: member.register_number || '',
+        class: member.class || '',
+        address: member.address || '',
+        membership_type: member.membership_type,
+        status: member.status
+      });
+    } else {
+      fetchNextRegisterNumber();
+      setFormData(prev => ({
+        ...prev,
+        name: '',
+        phone: '',
+        place: '',
+        class: '',
+        address: '',
+        email: `member_${Date.now()}@placeholder.email`,
+        membership_type: 'student',
+        status: 'active'
+      }));
+    }
+  }, [member]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (member) { // Editing existing member
+        const memberData = { ...formData, updated_at: new Date().toISOString() };
+        const { error } = await supabase.from('members').update(memberData).eq('id', member.id);
+        if (error) throw error;
+      } else { // Adding new member
+        const { name, place, class: className, register_number, email, membership_type, status, phone } = formData;
+        const newMemberData = {
+          name, place, class: className, register_number, email, membership_type, status, phone,
+          membership_date: new Date().toISOString(), created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+        };
+        const { error } = await supabase.from('members').insert(newMemberData);
+        if (error) throw error;
+      }
+      onSave();
+    } catch (error) {
+      console.error('Error saving member:', error);
+      alert('Error saving member');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddClass = () => {
+    if (newClassName.trim() && !memberClasses.includes(newClassName.trim())) {
+      setMemberClasses([...memberClasses, newClassName.trim()]);
+      setNewClassName('');
+      setShowAddClass(false);
+    }
+  };
+
+  const handleDeleteClass = (className: string) => {
+    if (window.confirm(`Are you sure you want to remove "${className}" from the class list?`)) {
+      setMemberClasses(memberClasses.filter(c => c !== className));
+      if (formData.class === className) {
+        setFormData({ ...formData, class: '' });
+      }
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center p-6 border-b">
+          <h2 className="text-xl font-semibold">{member ? 'Edit Member' : 'Add New Member'}</h2>
+          <button onClick={onClose}><X /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+              <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border rounded-md" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="w-full px-3 py-2 border rounded-md" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Place</label>
+            <input type="text" value={formData.place} onChange={(e) => setFormData({ ...formData, place: e.target.value })} className="w-full px-3 py-2 border rounded-md" />
+          </div>
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-medium text-gray-700">Class</label>
+              <button
+                type="button"
+                onClick={() => setShowAddClass(!showAddClass)}
+                className="text-xs text-primary hover:text-primary-dark flex items-center gap-1 font-semibold"
+              >
+                <Plus size={14} /> Add New Class
+              </button>
+            </div>
+
+            {showAddClass && (
+              <div className="mb-2 flex gap-2">
+                <input
+                  type="text"
+                  value={newClassName}
+                  onChange={(e) => setNewClassName(e.target.value)}
+                  placeholder="Enter new class name..."
+                  className="flex-1 px-3 py-2 border rounded-md text-sm"
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddClass())}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddClass}
+                  className="bg-primary text-white px-4 py-2 rounded-md text-sm hover:bg-primary-dark"
+                >
+                  Add
+                </button>
+              </div>
+            )}
+
+            <Select
+              options={classOptions}
+              value={classOptions.find(opt => opt.value === formData.class)}
+              onChange={(option) => setFormData({ ...formData, class: option ? option.value : '' })}
+              placeholder="Search and select a class..."
+              isClearable
+              styles={customSelectStyles}
+              components={{
+                Option: (props: any) => (
+                  <div className="flex items-center justify-between px-3 py-2 hover:bg-neutral-100 cursor-pointer">
+                    <div onClick={() => props.selectOption(props.data)} className="flex-1">
+                      {props.data.label}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClass(props.data.value);
+                      }}
+                      className="text-red-500 hover:text-red-700 p-1"
+                      title="Delete this class"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )
+              }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Register Number</label>
+            <div className="relative">
+              <input type="text" readOnly={!member} value={formData.register_number} onChange={(e) => member && setFormData({ ...formData, register_number: e.target.value })} className={`w-full px-3 py-2 border rounded-md ${!member ? 'bg-gray-100' : ''}`} />
+              {isFetchingId && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />}
+            </div>
+          </div>
+          {member && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-3 py-2 border rounded-md" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <textarea rows={3} value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="w-full px-3 py-2 border rounded-md" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Membership Type</label>
+                  <select value={formData.membership_type} onChange={(e) => setFormData({ ...formData, membership_type: e.target.value as Member['membership_type'] })} className="w-full px-3 py-2 border rounded-md">
+                    <option value="student">Student</option>
+                    <option value="regular">Regular</option>
+                    <option value="premium">Premium</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as Member['status'] })} className="w-full px-3 py-2 border rounded-md">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+          <div className="flex justify-end gap-3 pt-4">
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-100 rounded-md">Cancel</button>
+            <button type="submit" disabled={loading || isFetchingId} className="px-4 py-2 bg-purple-600 text-white rounded-md disabled:opacity-50">
+              {loading ? 'Saving...' : 'Save Member'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default MemberModal;

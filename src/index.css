@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply bg-neutral-50 text-neutral-800 antialiased;
+}
+
+/* Performance Optimizations for Smooth Scrolling */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* Hardware acceleration for better performance */
+.will-change-transform {
+    will-change: transform;
+}
+
+/* Optimize animations */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Smooth scrolling container */
+.overflow-y-auto,
+.overflow-auto {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Extra small screen breakpoint */
+@media (min-width: 475px) {
+    .xs\:inline {
+        display: inline;
+    }
+}
+
+/* Custom prose styles to match theme */
+.prose {
+    @apply text-neutral-700;
+}
+.prose h1, .prose h2, .prose h3, .prose h4, .prose strong {
+    @apply text-neutral-900;
+}
+.prose a {
+    @apply text-primary hover:text-primary-dark;
+}
+.prose blockquote {
+    @apply border-l-4 border-primary/20 pl-4 text-neutral-600 italic;
+}
+.prose code {
+    @apply text-primary-dark bg-primary/10 rounded-sm px-1 py-0.5 font-mono text-sm;
+}
+.prose pre {
+    @apply bg-neutral-800 text-white p-4 rounded-lg;
+}
+
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #qr-print-area, #qr-print-area *,
+  #member-print-area, #member-print-area * {
+    visibility: visible;
+  }
+  #qr-print-area, #member-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  .a4-page {
+    width: 210mm;
+    height: 297mm;
+    page-break-after: always;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 4mm;
+    padding: 10mm;
+    box-sizing: border-box;
+    border: 1px solid #eee; /* Helper for visualization, doesn't print */
+  }
+  .qr-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding: 2mm;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+  }
+  .qr-item canvas {
+    max-width: 100%;
+    max-height: 75%;
+    height: auto !important;
+    width: auto !important;
+  }
+  .qr-item-title {
+    font-size: 6pt;
+    line-height: 1.2;
+    margin-top: 2px;
+    font-family: sans-serif;
+    word-break: break-word;
+    -webkit-line-clamp: 2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .qr-item-ddc {
+    font-size: 5pt;
+    font-family: monospace;
+    color: #555;
+  }
+
+  /* Member Print Styles */
+  #member-print-area h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #member-print-area table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+  }
+  #member-print-area th, #member-print-area td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+  }
+  #member-print-area th {
+    background-color: #f2f2f2;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
